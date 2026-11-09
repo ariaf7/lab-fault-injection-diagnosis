@@ -11,16 +11,23 @@ temporary_directory=$(mktemp -d)
 cleanup_started=false
 
 inject_latency() {
-  # TODO: add the pricing_latency downstream latency toxic using
-  # TOXIPROXY_PROXY and TOXIPROXY_LATENCY_MS.
-  :
+  curl --fail-with-body -sS -X POST \
+    "${TOXIPROXY_URL}/proxies/${TOXIPROXY_PROXY}/toxics" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "name": "pricing_latency",
+      "type": "latency",
+      "stream": "downstream",
+      "attributes": {
+        "latency": '"${TOXIPROXY_LATENCY_MS}"',
+        "jitter": 0
+      }
+    }'
 }
-
 remove_latency() {
-  # TODO: remove the pricing_latency toxic here.
-  :
+  curl --fail-with-body -sS -X DELETE \
+    "${TOXIPROXY_URL}/proxies/${TOXIPROXY_PROXY}/toxics/pricing_latency"
 }
-
 cleanup() {
   if [[ "$cleanup_started" == true ]]; then
     return
